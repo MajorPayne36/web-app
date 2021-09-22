@@ -1,0 +1,36 @@
+###
+# Registration
+POST https://server.local:8443/api/rest/users/register
+Content-Type: application/json
+
+{
+  "username": {{$uuid}},
+  "password": "top-secret"
+}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+###
+
+POST https://server.local:8443/api/rest/users/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "god"
+}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+###
+
+GET https://server.local:8443/api/cards.getAll
+Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==

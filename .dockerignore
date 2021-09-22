@@ -1,0 +1,31 @@
+/apache-tomcat*
+!/apache-tomcat-10.0.11/conf/server.xml
+!/apache-tomcat-10.0.11/conf/certs
+
+### Regular files ###
+/out/
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+**/.apt_generated
+**/.classpath
+**/.factorypath
+**/.project
+**/.settings
+**/.springBeans
+**/.sts4-cache
+
+### IntelliJ IDEA ###
+**/.idea
+**/*.iws
+**/*.iml
+**/*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
