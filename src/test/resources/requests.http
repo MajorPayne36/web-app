@@ -35,12 +35,6 @@ GET https://localhost:8443/api/cards.getById/1
 Content-Type: application/json
 Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
 
-{
-  "fromCardNumber": "**** *888",
-  "toCardNumber": "**** *999",
-  "money": 1
-}
-
 > {%
 client.test("Request executed successfully", function() {
   client.assert(response.status === 200, "Response status is not 200");

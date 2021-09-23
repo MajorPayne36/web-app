@@ -3,12 +3,10 @@ package org.example.app.service;
 import lombok.RequiredArgsConstructor;
 import org.example.app.domain.User;
 import org.example.app.domain.UserWithPassword;
-import org.example.app.dto.LoginRequestDto;
-import org.example.app.dto.LoginResponseDto;
-import org.example.app.dto.RegistrationRequestDto;
-import org.example.app.dto.RegistrationResponseDto;
+import org.example.app.dto.*;
 import org.example.app.exception.PasswordNotMatchesException;
 import org.example.app.exception.RegistrationException;
+import org.example.app.exception.UnsupportedResetConfirmException;
 import org.example.app.exception.UserNotFoundException;
 import org.example.app.jpa.JpaTransactionTemplate;
 import org.example.app.repository.UserRepository;
@@ -95,5 +93,22 @@ public class UserService implements AuthenticationProvider, AnonymousProvider {
     final var token = result.getKey();
     final var saved = result.getValue();
     return new LoginResponseDto(saved.getId(), saved.getUsername(), token);
+  }
+
+  public int reset(User user, PassResetDto dto){
+    final var username = user.getUsername().trim().toLowerCase();
+    final var password = dto.getNewPassword().trim();
+    final var encodedPassword = passwordEncoder.encode(password);
+
+    return repository.reset(username, encodedPassword);
+  }
+
+  public int confirmReset(PassResetConfirmDto confirmDto) {
+    final var codeDB = repository.findByCode(confirmDto.getCode());
+    if (codeDB.isPresent() && !codeDB.get().isActive() && codeDB.get().getUsername().equals(confirmDto.getUsername())){
+      return repository.confirmReset(confirmDto.getUsername(), confirmDto.getCode());
+    } else {
+      throw new UnsupportedResetConfirmException("Cant confirm because code was wrong!");
+    }
   }
 }

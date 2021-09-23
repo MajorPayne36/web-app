@@ -13,6 +13,14 @@ CREATE TABLE tokens
     "userId" BIGINT      NOT NULL REFERENCES users,
     created  timestamptz NOT NULL DEFAULT current_timestamp
 );
+CREATE TABLE reset_codes
+(
+    code     TEXT PRIMARY KEY,
+    username TEXT        NOT NULL,
+    password TEXT        NOT NULL,
+    active   BOOLEAN     NOT NULL DEFAULT FALSE,
+    created  timestamptz NOT NULL DEFAULT current_timestamp
+);
 CREATE TABLE registration_attempts
 (
     id       BIGSERIAL PRIMARY KEY,

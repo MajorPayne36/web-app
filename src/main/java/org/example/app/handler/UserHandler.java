@@ -7,9 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.example.app.domain.User;
 import org.example.app.dto.LoginRequestDto;
+import org.example.app.dto.PassResetConfirmDto;
+import org.example.app.dto.PassResetDto;
 import org.example.app.dto.RegistrationRequestDto;
 import org.example.app.service.CardService;
 import org.example.app.service.UserService;
+import org.example.app.util.UserHelper;
 import org.example.framework.attribute.RequestAttributes;
 
 import java.io.IOException;
@@ -39,6 +42,32 @@ public class UserHandler {
       log.log(Level.INFO, "register");
       final var requestDto = gson.fromJson(req.getReader(), LoginRequestDto.class);
       final var responseDto = service.login(requestDto);
+      resp.setHeader("Content-Type", "application/json");
+      resp.getWriter().write(gson.toJson(responseDto));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+
+  public void reset(HttpServletRequest req, HttpServletResponse resp) {
+    try {
+      log.log(Level.INFO, "reset");
+      final var user = UserHelper.getUser(req);
+      final var resetDto = gson.fromJson(req.getReader(), PassResetDto.class);
+      final var responseDto = service.reset(user, resetDto);
+      resp.setHeader("Content-Type", "application/json");
+      resp.getWriter().write(gson.toJson(responseDto));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void confirmReset(HttpServletRequest req, HttpServletResponse resp) {
+    try {
+      log.log(Level.INFO, "confirm reset");
+      final var resetDto = gson.fromJson(req.getReader(), PassResetConfirmDto.class);
+      final var responseDto = service.confirmReset(resetDto);
       resp.setHeader("Content-Type", "application/json");
       resp.getWriter().write(gson.toJson(responseDto));
     } catch (IOException e) {
