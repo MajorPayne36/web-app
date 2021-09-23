@@ -61,7 +61,7 @@ public class ServletContextLoadDestroyListener implements ServletContextListener
 
       final var routes = Map.<Pattern, Map<String, Handler>>of(
           Pattern.compile("/cards.getAll"), Map.of(GET, cardHandler::getAll),
-          Pattern.compile("/cards.getById"), Map.of(GET, cardHandler::getById),
+          Pattern.compile("/cards.getById/(?<cardId>\\d+)$"), Map.of(GET, cardHandler::getById),
           Pattern.compile("/cards.order"), Map.of(POST, cardHandler::order),
           Pattern.compile("/cards.blockById"), Map.of(DELETE, cardHandler::blockById),
           Pattern.compile("^/rest/cards/(?<cardId>\\d+)$"), Map.of(GET, cardHandler::getById),

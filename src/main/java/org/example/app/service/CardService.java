@@ -29,7 +29,7 @@ public class CardService {
     public Card getById(User currentUser, long cardId) {
         final User cardUser = userRepository.getCardOwnerById(cardId).orElseThrow(UserNotFoundException::new);
         final var foundedUser = userRepository.findByTokenWithRole(currentUser.getUsername());
-        if (cardUser == currentUser
+        if (cardUser.getId() == currentUser.getId()
                 || (foundedUser.isPresent()
                         && !foundedUser.get().getRole().isEmpty()
                         && foundedUser.get().getRole().equals(Roles.ROLE_ADMIN))) {
@@ -41,7 +41,7 @@ public class CardService {
 
     public Card doOrder(User currentUser, String fromCardNumber, String toCardNumber, long money) {
         final User cardUser = userRepository.getCardOwnerByNumber(fromCardNumber).orElseThrow(UserNotFoundException::new);
-        if (cardUser == currentUser) {
+        if (cardUser.getId() == currentUser.getId()) {
             final var from = cardRepository.getCardByNumber(fromCardNumber).orElseThrow(CardNotFoundException::new);
             final var to = cardRepository.getCardByNumber(toCardNumber).orElseThrow(CardNotFoundException::new);
             return cardRepository.doOrder(cardUser, from, to, money);

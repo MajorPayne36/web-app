@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.example.app.domain.User;
+import org.example.app.dto.OrderDto;
 import org.example.app.service.CardService;
 import org.example.app.util.UserHelper;
 import org.example.framework.attribute.RequestAttributes;
@@ -47,11 +48,9 @@ public class CardHandler { // Servlet -> Controller -> Service (domain) -> domai
 
   public void order(HttpServletRequest req, HttpServletResponse resp) {
     try {
-      final var fromCardNumber = ((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("fromCardNumber");
-      final var toCardNumber = ((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("toCardNumber");
-      final var money = Long.parseLong(((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("money"));
+      final var orderDto = gson.fromJson(req.getReader(), OrderDto.class);
       final var user = UserHelper.getUser(req);
-      final var data = service.doOrder(user, fromCardNumber, toCardNumber, money);
+      final var data = service.doOrder(user, orderDto.getFromCardNumber(), orderDto.getToCardNumber(), orderDto.getMoney());
       resp.setHeader("Content-Type", "application/json");
       resp.getWriter().write(gson.toJson(data));
     } catch (IOException e) {

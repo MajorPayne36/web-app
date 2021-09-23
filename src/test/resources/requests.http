@@ -30,7 +30,39 @@ client.test("Request executed successfully", function() {
 });
 %}
 
-###
-
-GET https://server.local:8443/api/cards.getAll
+### Get card by his id
+GET https://localhost:8443/api/cards.getById/1
+Content-Type: application/json
 Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+
+{
+  "fromCardNumber": "**** *888",
+  "toCardNumber": "**** *999",
+  "money": 1
+}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+
+### Do order to coard from 888 to 999 when authorization user is admin
+
+POST https://localhost:8443/api/cards.order
+Content-Type: application/json
+Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+
+{
+
+  "fromCardNumber": "**** *888",
+  "toCardNumber": "**** *999",
+  "money": 1
+}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
