@@ -1,6 +1,6 @@
 ###
 # Registration
-POST https://server.local:8443/api/rest/users/register
+POST https://localhost:8443/api/rest/users/register
 Content-Type: application/json
 
 {
@@ -16,7 +16,7 @@ client.test("Request executed successfully", function() {
 
 ###
 
-POST https://server.local:8443/api/rest/users/login
+POST https://localhost:8443/api/rest/users/login
 Content-Type: application/json
 
 {

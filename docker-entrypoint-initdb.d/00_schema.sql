@@ -3,6 +3,7 @@ CREATE TABLE users
     id       BIGSERIAL PRIMARY KEY,
     username TEXT        NOT NULL UNIQUE,
     password TEXT        NOT NULL,
+    role     TEXT        NOT NULL,
     active   BOOLEAN     NOT NULL DEFAULT TRUE,
     created  timestamptz NOT NULL DEFAULT current_timestamp
 );

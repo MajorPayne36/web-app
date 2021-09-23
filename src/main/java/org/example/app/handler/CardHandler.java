@@ -33,11 +33,31 @@ public class CardHandler { // Servlet -> Controller -> Service (domain) -> domai
   }
 
   public void getById(HttpServletRequest req, HttpServletResponse resp) {
-    final var cardId = Long.parseLong(((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("cardId"));
+    try {
+      final var cardId = Long.parseLong(((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("cardId"));
+      final var user = UserHelper.getUser(req);
+      final var data = service.getById(user, cardId);
+      resp.setHeader("Content-Type", "application/json");
+      resp.getWriter().write(gson.toJson(data));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     log.log(Level.INFO, "getById");
   }
 
   public void order(HttpServletRequest req, HttpServletResponse resp) {
+    try {
+      final var fromCardNumber = ((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("fromCardNumber");
+      final var toCardNumber = ((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("toCardNumber");
+      final var money = Long.parseLong(((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("money"));
+      final var user = UserHelper.getUser(req);
+      final var data = service.doOrder(user, fromCardNumber, toCardNumber, money);
+      resp.setHeader("Content-Type", "application/json");
+      resp.getWriter().write(gson.toJson(data));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    log.log(Level.INFO, "getById");
   }
 
   public void blockById(HttpServletRequest req, HttpServletResponse resp) {

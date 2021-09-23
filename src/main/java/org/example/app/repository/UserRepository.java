@@ -3,12 +3,14 @@ package org.example.app.repository;
 import lombok.RequiredArgsConstructor;
 import org.example.app.domain.User;
 import org.example.app.domain.UserWithPassword;
+import org.example.app.domain.UserWithRole;
 import org.example.app.entity.UserEntity;
 import org.example.jdbc.JdbcTemplate;
 import org.example.jdbc.RowMapper;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -23,6 +25,11 @@ public class UserRepository {
       resultSet.getLong("id"),
       resultSet.getString("username"),
       resultSet.getString("password")
+  );
+  private final RowMapper<UserWithRole> rowMapperWithRole = resultSet -> new UserWithRole(
+      resultSet.getLong("id"),
+      resultSet.getString("username"),
+      resultSet.getString("role")
   );
 
   public Optional<User> getByUsername(String username) {
@@ -89,6 +96,53 @@ public class UserRepository {
             INSERT INTO tokens(token, "userId") VALUES (?, ?)
             """,
         token, userId
+    );
+  }
+
+  /**
+   * Find in Cards table the card owner
+   * @param cardNumber the number of card which owner we need to return
+   * @return owner of card
+   */
+  public Optional<User> getCardOwnerByNumber(String cardNumber){
+    // language=PostgreSQL
+    return jdbcTemplate.queryOne(
+            """
+            SELECT u.id, u.username FROM users u
+            Join cards c on u.id = c."ownerId"
+            WHERE c.number = ?
+            """,
+            rowMapper,
+            cardNumber
+    );
+  }/**
+   * Find in Cards table the card owner
+   * @param id the ID of card which owner we need to return
+   * @return owner of card
+   */
+  public Optional<User> getCardOwnerById(long id){
+    // language=PostgreSQL
+    return jdbcTemplate.queryOne(
+            """
+            SELECT u.id, u.username FROM users u
+            Join cards c on u.id = c."ownerId"
+            WHERE c.id = ?
+            """,
+            rowMapper,
+            id
+    );
+  }
+
+  public Optional<UserWithRole> findByTokenWithRole(String token) {
+    // language=PostgreSQL
+    return jdbcTemplate.queryOne(
+            """
+                SELECT u.id, u.username, u.role FROM tokens t
+                JOIN users u ON t."userId" = u.id
+                WHERE t.token = ?
+                """,
+            rowMapperWithRole,
+            token
     );
   }
 }
