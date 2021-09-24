@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @Data
 public class PassResetDto {
     String username;
-    boolean active;
     String newPassword;
 }

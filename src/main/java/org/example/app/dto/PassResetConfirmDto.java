@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class PassResetConfirmDto {
-    String username;
     String code;
+    String username;
+    String password;
+    boolean active;
 }

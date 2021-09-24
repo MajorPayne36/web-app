@@ -55,9 +55,9 @@ public class UserHandler {
       log.log(Level.INFO, "reset");
       final var user = UserHelper.getUser(req);
       final var resetDto = gson.fromJson(req.getReader(), PassResetDto.class);
-      final var responseDto = service.reset(user, resetDto);
+      final var response = service.reset(user, resetDto);
       resp.setHeader("Content-Type", "application/json");
-      resp.getWriter().write(gson.toJson(responseDto));
+      resp.getWriter().write(gson.toJson(response));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

@@ -34,10 +34,11 @@ public class UserRepository {
             resultSet.getString("username"),
             resultSet.getString("role")
     );
-    private final RowMapper<PassResetDto> rowMapperForPassReset = resultSet -> new PassResetDto(
+    private final RowMapper<PassResetConfirmDto> rowMapperForPassReset = resultSet -> new PassResetConfirmDto(
+            resultSet.getString("code"),
             resultSet.getString("username"),
-            resultSet.getBoolean("active"),
-            resultSet.getString("code")
+            resultSet.getString("password"),
+            resultSet.getBoolean("active")
     );
 
     public Optional<User> getByUsername(String username) {
@@ -167,11 +168,11 @@ public class UserRepository {
         }
     }
 
-    public Optional<PassResetDto> findByCode(String code) {
+    public Optional<PassResetConfirmDto> findByCode(String code) {
         // language=PostgreSQL
         return jdbcTemplate.queryOne(
                 """
-                        SELECT username, code, active FROM reset_codes where code = ?
+                        SELECT code, username, password, active FROM reset_codes where code = ?
                         """,
                 rowMapperForPassReset,
                 code
@@ -196,10 +197,11 @@ public class UserRepository {
         // language=PostgreSQL
         return jdbcTemplate.update(
                 """
-                        UPDATE users SET password = ? WHERE username = ? RETURNING id, username
-                        """, rowMapper,
-                codeDB.get().getNewPassword(),
-                username
+                        UPDATE users SET password = ? WHERE username = ?;
+                        UPDATE reset_codes SET active = ? WHERE username = ?;
+                        """,
+                codeDB.get().getPassword(), username,
+                true, username
         );
     }
 }
