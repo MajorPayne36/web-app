@@ -21,94 +21,110 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class UserService implements AuthenticationProvider, AnonymousProvider {
-  private final UserRepository repository;
-  private final JpaTransactionTemplate transactionTemplate;
-  private final PasswordEncoder passwordEncoder;
-  private final StringKeyGenerator keyGenerator;
+    private final UserRepository repository;
+    private final JpaTransactionTemplate transactionTemplate;
+    private final PasswordEncoder passwordEncoder;
+    private final StringKeyGenerator keyGenerator;
 
-  @Override
-  public Authentication authenticate(Authentication authentication) {
-    final var token = (String) authentication.getPrincipal();
+    @Override
+    public Authentication authenticate(Authentication authentication) {
+        final String principal = (String) authentication.getPrincipal();
+        if (principal.startsWith("Basic")) {
+            // TODO: Basic auth
+            final var credentials = (String)authentication.getCredentials();
+            int p = credentials.indexOf(":");
+            if (p != -1) {
+                String username = credentials.substring(0, p).trim();
+                String password = credentials.substring(p + 1).trim();
+                return repository.findByUsernameAndPassword(username, password)
+                        .map(o -> new BasicAuthentication(o, null, List.of(), true))
+                        .orElseThrow(AuthenticationException::new);
+            } else {
+                throw new AuthenticationException("Cant authenticate");
+            }
 
-    return repository.findByToken(token)
-        // TODO: add user roles
-        .map(o -> new TokenAuthentication(o, null, List.of(), true))
-        .orElseThrow(AuthenticationException::new);
-  }
-
-  @Override
-  public AnonymousAuthentication provide() {
-    return new AnonymousAuthentication(new User(
-        -1,
-        "anonymous"
-    ));
-  }
-
-  public RegistrationResponseDto register(RegistrationRequestDto requestDto) {
-    // TODO login:
-    //  case-sensitivity: coursar Coursar
-    //  cleaning: "  Coursar   "
-    //  allowed symbols: [A-Za-z0-9]{2,60}
-    //  mis...: Admin, Support, root, ...
-    //  мат: ...
-    // FIXME: check for nullability
-    final var username = requestDto.getUsername().trim().toLowerCase();
-    // TODO password:
-    //  min-length: 8
-    //  max-length: 64
-    //  non-dictionary
-    final var password = requestDto.getPassword().trim();
-    final var hash = passwordEncoder.encode(password);
-    final var token = keyGenerator.generateKey();
-    final var saved = repository.save(0, username, hash).orElseThrow(RegistrationException::new);
-
-    repository.saveToken(saved.getId(), token);
-    return new RegistrationResponseDto(saved.getId(), saved.getUsername(), token);
-  }
-
-  public LoginResponseDto login(LoginRequestDto requestDto) {
-    final var username = requestDto.getUsername().trim().toLowerCase();
-    final var password = requestDto.getPassword().trim();
-
-    final var result = transactionTemplate.executeInTransaction((entityManager, transaction) -> {
-      final var saved = repository.getByUsernameWithPassword(
-          entityManager,
-          transaction,
-          username
-      ).orElseThrow(UserNotFoundException::new);
-
-      // TODO: be careful - slow
-      if (!passwordEncoder.matches(password, saved.getPassword())) {
-        // FIXME: Security issue
-        throw new PasswordNotMatchesException();
-      }
-
-      final var token = keyGenerator.generateKey();
-      repository.saveToken(saved.getId(), token);
-      return new KeyValue<>(token, saved);
-    });
-
-    // FIXME: Security issue
-
-    final var token = result.getKey();
-    final var saved = result.getValue();
-    return new LoginResponseDto(saved.getId(), saved.getUsername(), token);
-  }
-
-  public int reset(User user, PassResetDto dto){
-    final var username = user.getUsername().trim().toLowerCase();
-    final var password = dto.getNewPassword().trim();
-    final var encodedPassword = passwordEncoder.encode(password);
-
-    return repository.reset(username, encodedPassword);
-  }
-
-  public int confirmReset(PassResetConfirmDto confirmDto) {
-    final var codeDB = repository.findByCode(confirmDto.getCode());
-    if (codeDB.isPresent() && !codeDB.get().isActive() && codeDB.get().getUsername().equals(confirmDto.getUsername())){
-      return repository.confirmReset(confirmDto.getUsername(), confirmDto.getCode());
-    } else {
-      throw new UnsupportedResetConfirmException("Cant confirm because code was wrong!");
+        } else {
+            final var token = principal;
+            return repository.findByToken(token)
+                    // TODO: add user roles
+                    .map(o -> new TokenAuthentication(o, null, List.of(), true))
+                    .orElseThrow(AuthenticationException::new);
+        }
     }
-  }
+
+    @Override
+    public AnonymousAuthentication provide() {
+        return new AnonymousAuthentication(new User(
+                -1,
+                "anonymous"
+        ));
+    }
+
+    public RegistrationResponseDto register(RegistrationRequestDto requestDto) {
+        // TODO login:
+        //  case-sensitivity: coursar Coursar
+        //  cleaning: "  Coursar   "
+        //  allowed symbols: [A-Za-z0-9]{2,60}
+        //  mis...: Admin, Support, root, ...
+        //  мат: ...
+        // FIXME: check for nullability
+        final var username = requestDto.getUsername().trim().toLowerCase();
+        // TODO password:
+        //  min-length: 8
+        //  max-length: 64
+        //  non-dictionary
+        final var password = requestDto.getPassword().trim();
+        final var hash = passwordEncoder.encode(password);
+        final var token = keyGenerator.generateKey();
+        final var saved = repository.save(0, username, hash).orElseThrow(RegistrationException::new);
+
+        repository.saveToken(saved.getId(), token);
+        return new RegistrationResponseDto(saved.getId(), saved.getUsername(), token);
+    }
+
+    public LoginResponseDto login(LoginRequestDto requestDto) {
+        final var username = requestDto.getUsername().trim().toLowerCase();
+        final var password = requestDto.getPassword().trim();
+
+        final var result = transactionTemplate.executeInTransaction((entityManager, transaction) -> {
+            final var saved = repository.getByUsernameWithPassword(
+                    entityManager,
+                    transaction,
+                    username
+            ).orElseThrow(UserNotFoundException::new);
+
+            // TODO: be careful - slow
+            if (!passwordEncoder.matches(password, saved.getPassword())) {
+                // FIXME: Security issue
+                throw new PasswordNotMatchesException();
+            }
+
+            final var token = keyGenerator.generateKey();
+            repository.saveToken(saved.getId(), token);
+            return new KeyValue<>(token, saved);
+        });
+
+        // FIXME: Security issue
+
+        final var token = result.getKey();
+        final var saved = result.getValue();
+        return new LoginResponseDto(saved.getId(), saved.getUsername(), token);
+    }
+
+    public int reset(User user, PassResetDto dto) {
+        final var username = user.getUsername().trim().toLowerCase();
+        final var password = dto.getNewPassword().trim();
+        final var encodedPassword = passwordEncoder.encode(password);
+
+        return repository.reset(username, encodedPassword);
+    }
+
+    public int confirmReset(PassResetConfirmDto confirmDto) {
+        final var codeDB = repository.findByCode(confirmDto.getCode());
+        if (codeDB.isPresent() && !codeDB.get().isActive() && codeDB.get().getUsername().equals(confirmDto.getUsername())) {
+            return repository.confirmReset(confirmDto.getUsername(), confirmDto.getCode());
+        } else {
+            throw new UnsupportedResetConfirmException("Cant confirm because code was wrong!");
+        }
+    }
 }

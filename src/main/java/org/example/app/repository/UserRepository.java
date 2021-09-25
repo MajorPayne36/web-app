@@ -59,6 +59,18 @@ public class UserRepository {
     }
 
     /**
+     * Do what doing previous method, but using JDBC
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+    public Optional<UserWithPassword> findByUsernameAndPassword(String username, String password) {
+        // language=PostgreSQL
+        return jdbcTemplate.queryOne("SELECT id, username, password FROM users WHERE username = ?", rowMapperWithPassword, username);
+    }
+
+    /**
      * saves user to db
      *
      * @param id       - user id, if 0 - insert, if not 0 - update
