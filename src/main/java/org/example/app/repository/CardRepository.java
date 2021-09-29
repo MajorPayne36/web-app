@@ -48,7 +48,7 @@ public class CardRepository {
         );
     }
 
-    public Card doOrder(User cardUser, Card from, Card to, long money) {
+    public Card doOrder(Card from, Card to, long money) {
         // language=PostgreSQL
         jdbcTemplate.update(
                 """

@@ -57,7 +57,11 @@ public class CardService {
         if (cardUser.getId() == currentUser.getId()) {
             final var from = cardRepository.getCardByNumber(fromCardNumber).orElseThrow(CardNotFoundException::new);
             final var to = cardRepository.getCardByNumber(toCardNumber).orElseThrow(CardNotFoundException::new);
-            return cardRepository.doOrder(cardUser, from, to, money);
+            if (from.getBalance() >= money) {
+                return cardRepository.doOrder(from, to, money);
+            } else {
+                throw new UnsupportedOperationException("User dont have enough money for order!");
+            }
         } else {
             throw new UnsupportedOperationException("User not owner or don't have admin role!");
         }
