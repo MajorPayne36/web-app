@@ -49,9 +49,8 @@ public class BasicAuthenticationFilter extends HttpFilter {
 
         String authHeader = req.getHeader("Authorization");
 
-        if (authHeader != null) {
+        if (authHeader != null && authHeader.startsWith("Basic")) {
             StringTokenizer st = new StringTokenizer(authHeader);
-            if (st.hasMoreTokens()) {
                 try {
                     String credentials = new String(Base64.decode(st.nextToken()), StandardCharsets.UTF_8);
                     try {
@@ -64,7 +63,6 @@ public class BasicAuthenticationFilter extends HttpFilter {
                 } catch (UnsupportedEncodingException e) {
                     throw new Error("Couldn't retrieve authentication", e);
                 }
-            }
         } else {
             unauthorized(res);
         }
