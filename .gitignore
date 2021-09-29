@@ -9,3 +9,5 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 /.idea/
+/apache-tomcat-10.0.11/webapps/ROOT/
+/apache-tomcat-10.0.11/webapps/api/
