@@ -20,7 +20,7 @@ import javax.persistence.EntityTransaction;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class UserService implements AuthenticationProvider, AnonymousProvider {
+public class UserService implements AuthenticationProvider, AnonymousProvider, BasicAuthenticationProvider {
     private final UserRepository repository;
     private final JpaTransactionTemplate transactionTemplate;
     private final PasswordEncoder passwordEncoder;
@@ -28,28 +28,21 @@ public class UserService implements AuthenticationProvider, AnonymousProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) {
-        final String principal = (String) authentication.getPrincipal();
-        if (principal.startsWith("Basic")) {
-            // TODO: Basic auth
-            final var credentials = (String)authentication.getCredentials();
-            int p = credentials.indexOf(":");
-            if (p != -1) {
-                String username = credentials.substring(0, p).trim();
-                String password = credentials.substring(p + 1).trim();
-                return repository.findByUsernameAndPassword(username, password)
-                        .map(o -> new BasicAuthentication(o, null, List.of(), true))
-                        .orElseThrow(AuthenticationException::new);
-            } else {
-                throw new AuthenticationException("Cant authenticate");
-            }
+        final String token = (String) authentication.getPrincipal();
+        return repository.findByToken(token)
+                // TODO: add user roles
+                .map(o -> new TokenAuthentication(o, null, List.of(), true))
+                .orElseThrow(AuthenticationException::new);
 
-        } else {
-            final var token = principal;
-            return repository.findByToken(token)
-                    // TODO: add user roles
-                    .map(o -> new TokenAuthentication(o, null, List.of(), true))
-                    .orElseThrow(AuthenticationException::new);
-        }
+    }
+
+    @Override
+    public Authentication baseAuthenticate(Authentication authentication) throws AuthenticationException {
+        final String username = (String) authentication.getPrincipal();
+        final String password = (String) authentication.getCredentials();
+        return repository.findByUsernameAndPassword(username, password)
+                .map(o -> new BasicAuthentication(o, null, List.of(), true))
+                .orElseThrow(AuthenticationException::new);
     }
 
     @Override
