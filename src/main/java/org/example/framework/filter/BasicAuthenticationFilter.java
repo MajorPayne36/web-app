@@ -18,7 +18,7 @@ import org.example.framework.security.*;
 
 
 public class BasicAuthenticationFilter extends HttpFilter {
-    private AuthenticationProvider provider;
+    private BasicAuthenticationProvider provider;
 
     private String username = "";
     private String password = "";
@@ -33,7 +33,7 @@ public class BasicAuthenticationFilter extends HttpFilter {
 //            realm = paramRealm;
 //        }
         super.init(filterConfig);
-        provider = ((AuthenticationProvider) getServletContext().getAttribute(ContextAttributes.BASIC_PROVIDER_ATTR));
+        provider = ((BasicAuthenticationProvider) getServletContext().getAttribute(ContextAttributes.BASIC_PROVIDER_ATTR));
     }
 
     @Override
@@ -53,15 +53,21 @@ public class BasicAuthenticationFilter extends HttpFilter {
             StringTokenizer st = new StringTokenizer(authHeader);
                 try {
                     String credentials = new String(Base64.decode(st.nextToken()), StandardCharsets.UTF_8);
-                    try {
-                        final var authentication = provider.authenticate(new BasicAuthentication("Basic", credentials));
-                        req.setAttribute(RequestAttributes.AUTH_ATTR, authentication);
-                    } catch (AuthenticationException e) {
-                        unauthorized(res, "Invalid authentication");
+                    int p = credentials.indexOf(":");
+                    if (p != -1) {
+                        String username = credentials.substring(0, p).trim();
+                        String password = credentials.substring(p + 1).trim();
+                        try {
+                            final var authentication = provider.baseAuthenticate(new BasicAuthentication(username, password));
+                            req.setAttribute(RequestAttributes.AUTH_ATTR, authentication);
+                        } catch (AuthenticationException e) {
+                            unauthorized(res, "{\"status\" : \"error\", \"message\" : \"Invalid authentication\"}");
+                        }
+                    } else {
+                        unauthorized(res);
                     }
-
                 } catch (UnsupportedEncodingException e) {
-                    throw new Error("Couldn't retrieve authentication", e);
+                    throw new Error("{\"status\" : \"error\", \"message\" : \"Couldn't retrieve authentication\"}", e);
                 }
         } else {
             unauthorized(res);
@@ -102,7 +108,7 @@ public class BasicAuthenticationFilter extends HttpFilter {
     }
 
     private void unauthorized(HttpServletResponse response) throws IOException {
-        unauthorized(response, "Unauthorized");
+        unauthorized(response, "{\"status\" : \"error\", \"message\" : \"Unauthorized\"}");
     }
 
     private boolean authenticationIsRequired(HttpServletRequest req) {
