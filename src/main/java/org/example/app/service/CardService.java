@@ -29,7 +29,7 @@ public class CardService {
      */
     public Card getById(User currentUser, long cardId) {
         final User cardUser = userRepository.getCardOwnerById(cardId).orElseThrow(UserNotFoundException::new);
-        final var foundedUser = userRepository.findByTokenWithRole(currentUser.getUsername());
+        final var foundedUser = userRepository.findByUsernameWithRole(currentUser.getUsername());
         if (cardUser.getId() == currentUser.getId()
                 || (foundedUser.isPresent()
                 && !foundedUser.get().getRole().isEmpty()

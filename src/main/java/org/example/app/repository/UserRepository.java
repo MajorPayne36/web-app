@@ -158,16 +158,15 @@ public class UserRepository {
         );
     }
 
-    public Optional<UserWithRole> findByTokenWithRole(String token) {
+    public Optional<UserWithRole> findByUsernameWithRole(String username) {
         // language=PostgreSQL
         return jdbcTemplate.queryOne(
                 """
-                        SELECT u.id, u.username, u.role FROM tokens t
-                        JOIN users u ON t."userId" = u.id
-                        WHERE t.token = ?
+                        SELECT u.id, u.username, u.role FROM users u
+                        WHERE u.username = ?
                         """,
                 rowMapperWithRole,
-                token
+                username
         );
     }
 
