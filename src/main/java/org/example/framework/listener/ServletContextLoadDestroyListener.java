@@ -61,13 +61,13 @@ public class ServletContextLoadDestroyListener implements ServletContextListener
       final var cardHandler = new CardHandler(cardService, gson);
 
       final var routes = Map.<Pattern, Map<String, Handler>>of(
-          Pattern.compile("/cards.getAll"), Map.of(GET, cardHandler::getAll),
-          Pattern.compile("/cards.getById/(?<cardId>\\d+)$"), Map.of(GET, cardHandler::getById),
-          Pattern.compile("/cards.order"), Map.of(POST, cardHandler::order),
-          Pattern.compile("/cards.create/(?<cardBalance>\\d+)$"), Map.of(POST, cardHandler::create),
-          Pattern.compile("/cards.blockByNumber/(?<cardNumber>\\d+)$"), Map.of(DELETE, cardHandler::blockByNumber),
-          Pattern.compile("/users/reset.password"), Map.of(POST, userHandler::reset),
-          Pattern.compile("/users/reset.confirm"), Map.of(POST, userHandler::confirmReset),
+          Pattern.compile("/cards/get"), Map.of(GET, cardHandler::getAll),
+          Pattern.compile("/cards/get/(?<cardId>\\d+)$"), Map.of(GET, cardHandler::getById),
+          Pattern.compile("/cards/order"), Map.of(POST, cardHandler::order),
+          Pattern.compile("/cards/create/(?<cardBalance>\\d+)$"), Map.of(POST, cardHandler::create),
+          Pattern.compile("/cards/block/(?<cardNumber>\\d+)$"), Map.of(DELETE, cardHandler::blockByNumber),
+          Pattern.compile("/users/reset/password"), Map.of(POST, userHandler::reset),
+          Pattern.compile("/users/reset/confirm"), Map.of(POST, userHandler::confirmReset),
           Pattern.compile("^/rest/cards/(?<cardId>\\d+)$"), Map.of(GET, cardHandler::getById),
           Pattern.compile("^/rest/users/register$"), Map.of(POST, userHandler::register),
           Pattern.compile("^/rest/users/login$"), Map.of(POST, userHandler::login)
