@@ -2,12 +2,8 @@ package org.example.app.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.app.domain.User;
-import org.example.app.domain.UserWithPassword;
 import org.example.app.dto.*;
-import org.example.app.exception.PasswordNotMatchesException;
-import org.example.app.exception.RegistrationException;
-import org.example.app.exception.UnsupportedResetConfirmException;
-import org.example.app.exception.UserNotFoundException;
+import org.example.app.exception.*;
 import org.example.app.jpa.JpaTransactionTemplate;
 import org.example.app.repository.UserRepository;
 import org.example.framework.security.*;
@@ -15,9 +11,8 @@ import org.example.framework.util.KeyValue;
 import org.springframework.security.crypto.keygen.StringKeyGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiredArgsConstructor
 public class UserService implements AuthenticationProvider, AnonymousProvider, BasicAuthenticationProvider {
@@ -113,11 +108,19 @@ public class UserService implements AuthenticationProvider, AnonymousProvider, B
     }
 
     public int confirmReset(PassResetConfirmDto confirmDto) {
-        final var codeDB = repository.findByCode(confirmDto.getCode());
-        if (codeDB.isPresent() && !codeDB.get().isActive() && codeDB.get().getUsername().equals(confirmDto.getUsername())) {
-            return repository.confirmReset(confirmDto.getUsername(), confirmDto.getCode());
-        } else {
-            throw new UnsupportedResetConfirmException("Cant confirm because code was wrong!");
-        }
+        AtomicInteger result = new AtomicInteger();
+        repository.findByCode(confirmDto.getCode()).ifPresentOrElse(
+                v -> {
+                    if (v.isActive()) {
+                        result.set(repository.confirmReset(confirmDto.getUsername(), confirmDto.getCode()));
+                    } else {
+                        throw new CardNotActiveException("{\"status\" : \"error\", \"message\" : \"{\"status\" : \"error\", \"message\" : \"Your card is not ACTIVE!\"}");
+                    }
+                },
+                () -> {
+                    throw new UnsupportedResetConfirmException("{\"status\" : \"error\", \"message\" : \"{\"status\" : \"error\", \"message\" : \"Cant confirm because code was wrong!\"}");
+                }
+        );
+        return result.get();
     }
 }
