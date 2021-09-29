@@ -56,9 +56,32 @@ public class CardHandler { // Servlet -> Controller -> Service (domain) -> domai
     } catch (IOException e) {
       e.printStackTrace();
     }
-    log.log(Level.INFO, "getById");
+    log.log(Level.INFO, "order");
   }
 
-  public void blockById(HttpServletRequest req, HttpServletResponse resp) {
+  public void blockByNumber(HttpServletRequest req, HttpServletResponse resp) {
+    try {
+      final var cardNumber = ((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("cardNumber");
+      final var user = UserHelper.getUser(req);
+      final var data = service.blockCard(user, cardNumber);
+      resp.setHeader("Content-Type", "application/json");
+      resp.getWriter().write(gson.toJson(data));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    log.log(Level.INFO, "blockByNumber");
+  }
+
+  public void create(HttpServletRequest req, HttpServletResponse resp) {
+    try {
+      final var cardBalance = Long.parseLong(((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("cardBalance"));
+      final var user = UserHelper.getUser(req);
+      final var data = service.createNewCard(user, cardBalance);
+      resp.setHeader("Content-Type", "application/json");
+      resp.getWriter().write(gson.toJson(data));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    log.log(Level.INFO, "blockByNumber");
   }
 }
