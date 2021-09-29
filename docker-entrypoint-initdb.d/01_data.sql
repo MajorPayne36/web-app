@@ -12,7 +12,7 @@ VALUES ('6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms
 
 
 INSERT INTO cards(id, "ownerId", number, balance)
-VALUES (1, 1, '**** *888', 50000),
-       (2, 2, '**** *999', 90000);
+VALUES (1, 1, '8888 8888', 50000),
+       (2, 2, '9999 9999', 90000);
 
 ALTER SEQUENCE cards_id_seq RESTART WITH 3;
