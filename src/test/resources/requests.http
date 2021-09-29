@@ -31,7 +31,7 @@ client.test("Request executed successfully", function() {
 %}
 
 ### Get card by his id
-GET https://localhost:8443/api/cards.getById/1
+GET https://localhost:8443/api/cards/get/1
 Content-Type: application/json
 Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
 
@@ -44,14 +44,14 @@ client.test("Request executed successfully", function() {
 
 ### Do order to coard from 888 to 999 when authorization user is admin
 
-POST https://localhost:8443/api/cards.order
+POST https://localhost:8443/api/cards/order
 Content-Type: application/json
 Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
 
 {
 
-  "fromCardNumber": "**** *888",
-  "toCardNumber": "**** *999",
+  "fromCardNumber": "8888 8888",
+  "toCardNumber": "9999 9999",
   "money": 1
 }
 
@@ -63,7 +63,7 @@ client.test("Request executed successfully", function() {
 
 ### Here we will start reset the password
 
-POST https://localhost:8443/api/users/reset.password
+POST https://localhost:8443/api/users/reset/password
 Content-Type: application/json
 Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
 
@@ -82,7 +82,7 @@ client.test("Request executed successfully", function() {
 
 ### Here we will confirm reseting password
 
-POST https://localhost:8443/api/users/reset.confirm
+POST https://localhost:8443/api/users/reset/confirm
 Content-Type: application/json
 Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
 
