@@ -1,9 +1,11 @@
 package org.example.app.repository;
 
 import lombok.RequiredArgsConstructor;
+import net.bytebuddy.utility.RandomString;
 import org.example.app.domain.Card;
 import org.example.app.domain.User;
 import org.example.app.exception.CardNotFoundException;
+import org.example.app.util.Numbers;
 import org.example.jdbc.JdbcTemplate;
 import org.example.jdbc.RowMapper;
 
@@ -50,13 +52,33 @@ public class CardRepository {
         // language=PostgreSQL
         jdbcTemplate.update(
                 """
-                        UPDATE cards SET balance = ? WHERE number = ?;
-                        UPDATE cards SET balance = ? WHERE number = ?;
-                     """,
+                           UPDATE cards SET balance = ? WHERE number = ?;
+                           UPDATE cards SET balance = ? WHERE number = ?;
+                        """,
                 from.getBalance() - money, from.getNumber(),
                 to.getBalance() + money, to.getNumber()
         );
         // orElseThrow() has never been happen
         return getCardByNumber(from.getNumber()).orElseThrow(CardNotFoundException::new);
+    }
+
+    public Optional<Card> createNewCard(User currentUser, long balance) {
+        String number = Numbers.generateCardNumber() + " " + Numbers.generateCardNumber();
+        while (getCardByNumber(number).isPresent()) {
+            number = Numbers.generateCardNumber() + " " + Numbers.generateCardNumber();
+        }
+        // language=PostgreSQL
+        return jdbcTemplate.queryOne("""
+                INSERT INTO cards ("ownerId", number, balance) VALUES (?, ?) RETURNING id, number, balance
+                """, cardRowMapper, currentUser.getId(), number, balance);
+    }
+
+    public int blockCardByNumber(String cardNumber) {
+        // language=PostgreSQL
+        return jdbcTemplate.update("""
+                        UPDATE cards SET active = ? WHERE number = ?
+                        """,
+                false, cardNumber
+        );
     }
 }

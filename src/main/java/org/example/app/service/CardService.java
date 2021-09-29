@@ -22,8 +22,9 @@ public class CardService {
 
     /**
      * Find card from db if user is owner or he has role ROLE_ADMIN
+     *
      * @param currentUser user who done request
-     * @param cardId id of card which we should find
+     * @param cardId      id of card which we should find
      * @return Card founded card or UOE
      */
     public Card getById(User currentUser, long cardId) {
@@ -31,11 +32,23 @@ public class CardService {
         final var foundedUser = userRepository.findByTokenWithRole(currentUser.getUsername());
         if (cardUser.getId() == currentUser.getId()
                 || (foundedUser.isPresent()
-                        && !foundedUser.get().getRole().isEmpty()
-                        && foundedUser.get().getRole().equals(Roles.ROLE_ADMIN))) {
+                && !foundedUser.get().getRole().isEmpty()
+                && foundedUser.get().getRole().equals(Roles.ROLE_ADMIN))) {
             return cardRepository.getCardById(cardId).orElseThrow(CardNotFoundException::new);
         } else {
             throw new UnsupportedOperationException("User not owner or don't have admin role!");
+        }
+    }
+
+    public Card createNewCard(User currentUser, long balance) {
+        return cardRepository.createNewCard(currentUser, balance).orElseThrow(() -> new CardNotFoundException("Cant create card!"));
+    }
+
+    public int blockCard(User currentUser, String cardNumber) {
+        if (cardRepository.getAllByOwnerId(currentUser.getId()).contains(cardRepository.getCardByNumber(cardNumber).orElseThrow(CardNotFoundException::new))) {
+            return cardRepository.blockCardByNumber(cardNumber);
+        } else {
+            throw new CardNotFoundException();
         }
     }
 
