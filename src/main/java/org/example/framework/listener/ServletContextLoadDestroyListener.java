@@ -13,6 +13,7 @@ import org.example.app.repository.CardRepository;
 import org.example.app.repository.UserRepository;
 import org.example.app.service.CardService;
 import org.example.app.service.UserService;
+import org.example.app.util.random.Random4NumberGen;
 import org.example.framework.attribute.ContextAttributes;
 import org.example.framework.servlet.Handler;
 import org.example.jdbc.JdbcTemplate;
@@ -56,7 +57,7 @@ public class ServletContextLoadDestroyListener implements ServletContextListener
       context.setAttribute(ContextAttributes.BASIC_PROVIDER_ATTR, userService);
       final var userHandler = new UserHandler(userService, gson);
 
-      final var cardRepository = new CardRepository(jdbcTemplate);
+      final var cardRepository = new CardRepository(jdbcTemplate, new Random4NumberGen());
       final var cardService = new CardService(cardRepository, userRepository);
       final var cardHandler = new CardHandler(cardService, gson);
 

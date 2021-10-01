@@ -6,6 +6,7 @@ import org.example.app.domain.Card;
 import org.example.app.domain.User;
 import org.example.app.exception.CardNotFoundException;
 import org.example.app.util.Numbers;
+import org.example.app.util.random.Random4NumberGen;
 import org.example.jdbc.JdbcTemplate;
 import org.example.jdbc.RowMapper;
 
@@ -15,6 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CardRepository {
     private final JdbcTemplate jdbcTemplate;
+    private final Random4NumberGen numberGenerator;
     private final RowMapper<Card> cardRowMapper = resultSet -> new Card(
             resultSet.getLong("id"),
             resultSet.getString("number"),
@@ -63,9 +65,9 @@ public class CardRepository {
     }
 
     public Optional<Card> createNewCard(User currentUser, long balance) {
-        String number = Numbers.generateCardNumber() + " " + Numbers.generateCardNumber();
+        String number = numberGenerator.getInt() + " " + numberGenerator.getInt();
         while (getCardByNumber(number).isPresent()) {
-            number = Numbers.generateCardNumber() + " " + Numbers.generateCardNumber();
+            number = numberGenerator.getInt() + " " + numberGenerator.getInt();
         }
         // language=PostgreSQL
         return jdbcTemplate.queryOne("""
