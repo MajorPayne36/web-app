@@ -4,11 +4,8 @@ import com.google.gson.Gson;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.ServletSecurity;
-import jakarta.servlet.annotation.WebListener;
-import jdk.jfr.Percentage;
 import org.example.app.handler.CardHandler;
 import org.example.app.handler.UserHandler;
-import org.example.app.jpa.JpaTransactionTemplate;
 import org.example.app.repository.CardRepository;
 import org.example.app.repository.UserRepository;
 import org.example.app.service.CardService;
@@ -44,14 +41,13 @@ public class ServletContextLoadDestroyListener implements ServletContextListener
 
       final var entityManagerFactory = Persistence.createEntityManagerFactory("default");
       context.setAttribute(ContextAttributes.ENTITY_MANAGER_FACTORY_ATTR, entityManagerFactory);
-      final var jpaTransactionTemplate = new JpaTransactionTemplate(entityManagerFactory);
 
       final var gson = new Gson();
 
       final var userRepository = new UserRepository(jdbcTemplate);
       final var passwordEncoder = new Argon2PasswordEncoder();
       final var keyGenerator = new Base64StringKeyGenerator(64);
-      final var userService = new UserService(userRepository, jpaTransactionTemplate, passwordEncoder, keyGenerator);
+      final var userService = new UserService(userRepository, passwordEncoder, keyGenerator);
       context.setAttribute(ContextAttributes.AUTH_PROVIDER_ATTR, userService);
       context.setAttribute(ContextAttributes.ANON_PROVIDER_ATTR, userService);
       context.setAttribute(ContextAttributes.BASIC_PROVIDER_ATTR, userService);

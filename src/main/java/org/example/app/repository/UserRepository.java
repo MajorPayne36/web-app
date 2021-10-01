@@ -46,16 +46,9 @@ public class UserRepository {
         return jdbcTemplate.queryOne("SELECT id, username FROM users WHERE username = ?", rowMapper, username);
     }
 
-    public Optional<UserWithPassword> getByUsernameWithPassword(EntityManager entityManager, EntityTransaction transaction, String username) {
-        // em, emt - closeable
-        return entityManager.createNamedQuery(UserEntity.FIND_BY_USERNAME, UserEntity.class)
-                .setParameter("username", username)
-                .setMaxResults(1)
-                .getResultStream()
-                .map(o -> new UserWithPassword(o.getId(), o.getUsername(), o.getPassword()))
-                .findFirst();
-        // language=PostgreSQL
-        // return jdbcTemplate.queryOne("SELECT id, username, password FROM users WHERE username = ?", rowMapperWithPassword, username);
+    public Optional<UserWithPassword> getByUsernameWithPassword(String username) {
+//         language=PostgreSQL
+         return jdbcTemplate.queryOne("SELECT id, username, password FROM users WHERE username = ?", rowMapperWithPassword, username);
     }
 
     /**

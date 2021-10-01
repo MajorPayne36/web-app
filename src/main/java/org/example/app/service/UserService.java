@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 public class UserService implements AuthenticationProvider, AnonymousProvider, BasicAuthenticationProvider {
     private final UserRepository repository;
-    private final JpaTransactionTemplate transactionTemplate;
     private final PasswordEncoder passwordEncoder;
     private final StringKeyGenerator keyGenerator;
 
@@ -74,28 +73,18 @@ public class UserService implements AuthenticationProvider, AnonymousProvider, B
         final var username = requestDto.getUsername().trim().toLowerCase();
         final var password = requestDto.getPassword().trim();
 
-        final var result = transactionTemplate.executeInTransaction((entityManager, transaction) -> {
-            final var saved = repository.getByUsernameWithPassword(
-                    entityManager,
-                    transaction,
-                    username
-            ).orElseThrow(UserNotFoundException::new);
+        final var saved = repository.getByUsernameWithPassword(username)
+                .orElseThrow(UserNotFoundException::new);
 
-            // TODO: be careful - slow
-            if (!passwordEncoder.matches(password, saved.getPassword())) {
-                // FIXME: Security issue
-                throw new PasswordNotMatchesException();
-            }
+        // TODO: be careful - slow
+        if (!passwordEncoder.matches(password, saved.getPassword())) {
+            // FIXME: Security issue
+            throw new PasswordNotMatchesException();
+        }
 
-            final var token = keyGenerator.generateKey();
-            repository.saveToken(saved.getId(), token);
-            return new KeyValue<>(token, saved);
-        });
+        final var token = keyGenerator.generateKey();
+        repository.saveToken(saved.getId(), token);
 
-        // FIXME: Security issue
-
-        final var token = result.getKey();
-        final var saved = result.getValue();
         return new LoginResponseDto(saved.getId(), saved.getUsername(), token);
     }
 
