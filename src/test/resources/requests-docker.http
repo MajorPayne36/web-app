@@ -1,6 +1,6 @@
 ###
 
-https://server.local:8443/cards.getAll
+https://server.local:8443/cards/get
 Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
 
 > {%
@@ -27,7 +27,7 @@ client.test("Request executed successfully", function() {
 
 ###
 
-https://server.local:8443/cards.getAll
+https://server.local:8443/cards/get
 Authorization: {{registration_token}}
 
 > {%
@@ -55,7 +55,7 @@ client.test("Request executed successfully", function() {
 
 ###
 
-https://server.local:8443/cards.getAll
+https://server.local:8443/cards/get
 Authorization: {{login_token}}
 
 > {%
